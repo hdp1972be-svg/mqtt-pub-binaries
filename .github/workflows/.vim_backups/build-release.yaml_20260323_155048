@@ -63,10 +63,6 @@ jobs:
 
           tar -czf mosquitto_pub-musl.tar.gz -C dist mosquitto_pub-musl
 
-      - uses: softprops/action-gh-release@v1
-        with:
-          files: dist/mosquitto_pub-musl
-
   windows:
     runs-on: windows-latest
 
