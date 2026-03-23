@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git cmake libssl-dev libc6-dev gcc-aarch64-linux-gnu libcjson-dev libssl-dev-arm64-cross 
+          sudo apt-get install -y build-essential git cmake libssl-dev libc6-dev gcc-aarch64-linux-gnu libssl-dev licjson-dev
       - run: |
           git clone https://github.com/eclipse-mosquitto/mosquitto.git
           cd mosquitto
@@ -29,11 +29,10 @@ jobs:
           fi
           make
       - run: |
-          mkdir -p dist/${{ matrix.arch }}
-          cp mosquitto/client/mosquitto_pub dist/${{ matrix.arch }}/
-          strip dist/${{ matrix.arch }}/mosquitto_pub
-          tar -czf dist/mosquitto_pub-${{ matrix.arch }}.tar.gz -C dist/${{ matrix.arch }} mosquitto_pub
-
+          mkdir -p dist
+          cp mosquitto/client/mosquitto_pub dist/mosquitto_pub-${{ matrix.arch }}
+          strip dist/mosquitto_pub-${{ matrix.arch }}
+          tar -czf mosquitto_pub-${{ matrix.arch }}.tar.gz -C dist mosquitto_pub-${{ matrix.arch }}
       - uses: softprops/action-gh-release@v1
         with:
           files: |
@@ -48,7 +47,7 @@ jobs:
 
       - run: |
           sudo apt-get update
-          sudo apt-get install -y musl-tools git build-essential libcjson-dev
+          sudo apt-get install -y musl-tools git build-essential
 
       - run: |
           git clone https://github.com/eclipse-mosquitto/mosquitto.git
