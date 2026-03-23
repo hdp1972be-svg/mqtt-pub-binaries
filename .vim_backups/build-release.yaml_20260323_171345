@@ -59,10 +59,10 @@ jobs:
           git clone https://github.com/eclipse-mosquitto/mosquitto.git
           cd mosquitto/client
           make CC=musl-gcc WITH_STATIC_LIBRARIES=yes
-          mkdir -p ../../dist
-          cp mosquitto_pub ../../dist/mosquitto_pub-musl
-          strip ../../dist/mosquitto_pub-musl
-          tar -czf ../../dist/mosquitto_pub-musl.tar.gz -C ../../dist mosquitto_pub-musl
+    mkdir -p ../../dist
+    cp mosquitto_pub ../../dist/mosquitto_pub-musl
+    strip ../../dist/mosquitto_pub-musl
+    tar -czf ../../dist/mosquitto_pub-musl.tar.gz -C ../../dist mosquitto_pub-musl
 
       - run: |
           mkdir dist
