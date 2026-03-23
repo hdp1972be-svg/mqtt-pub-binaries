@@ -1,0 +1,31 @@
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          choco install git cmake openssl
+
+      - name: Clone mosquitto
+        run: |
+          git clone https://github.com/eclipse-mosquitto/mosquitto.git
+
+      - name: Build with CMake
+        run: |
+          cd mosquitto
+          mkdir build
+          cd build
+
+          cmake .. -DWITH_STATIC_LIBRARIES=ON
+          cmake --build . --config Release
+
+      - name: Package
+        run: |
+          mkdir dist
+          copy build\client\Release\mosquitto_pub.exe dist\mosquitto_pub.exe
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: dist/mosquitto_pub.exe

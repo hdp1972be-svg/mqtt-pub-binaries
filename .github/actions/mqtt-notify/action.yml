@@ -1,0 +1,61 @@
+name: "MQTT Notify (Prebuilt Binary)"
+description: "Send MQTT message using prebuilt mosquitto_pub"
+
+inputs:
+  broker:
+    required: true
+  topic:
+    required: true
+  message:
+    required: true
+  version:
+    required: false
+    default: "v1.0"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Detect platform
+      id: platform
+      shell: bash
+      run: |
+        OS=$(uname | tr '[:upper:]' '[:lower:]')
+        ARCH=$(uname -m)
+
+        if [[ "$ARCH" == "x86_64" ]]; then ARCH="amd64"; fi
+        if [[ "$ARCH" == "aarch64" ]]; then ARCH="arm64"; fi
+
+        echo "os=$OS" >> $GITHUB_OUTPUT
+        echo "arch=$ARCH" >> $GITHUB_OUTPUT
+
+    - name: Cache mosquitto_pub
+      uses: actions/cache@v3
+      with:
+        path: mosquitto_pub
+        key: mosquitto-${{ steps.platform.outputs.os }}-${{ steps.platform.outputs.arch }}-${{ inputs.version }}
+
+    - name: Download binary
+      if: ${{ !exists('mosquitto_pub') }}
+      shell: bash
+      run: |
+        BASE_URL="https://github.com/YOURUSER/mqtt-pub-binaries/releases/download/${{ inputs.version }}"
+        OS="${{ steps.platform.outputs.os }}"
+        ARCH="${{ steps.platform.outputs.arch }}"
+
+        if [[ "$OS" == "linux" ]]; then
+          FILE="mosquitto_pub-${ARCH}"
+        else
+          FILE="mosquitto_pub.exe"
+        fi
+
+        echo "Downloading $FILE..."
+        curl -L -o mosquitto_pub "$BASE_URL/$FILE"
+        chmod +x mosquitto_pub
+
+    - name: Publish message
+      shell: bash
+      run: |
+        ./mosquitto_pub \
+          -h "${{ inputs.broker }}" \
+          -t "${{ inputs.topic }}" \
+          -m "${{ inputs.message }}"

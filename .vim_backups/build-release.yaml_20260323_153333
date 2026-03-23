@@ -1,0 +1,39 @@
+name: Build mosquitto_pub binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git cmake libssl-dev libc6-dev gcc-aarch64-linux-gnu
+      - run: |
+          git clone https://github.com/eclipse-mosquitto/mosquitto.git
+          cd mosquitto
+          if [ "${{ matrix.arch }}" = "arm64" ]; then
+            export CC=aarch64-linux-gnu-gcc
+          else
+            export CC=gcc
+          fi
+          make
+      - run: |
+          mkdir -p dist
+          cp mosquitto/client/mosquitto_pub dist/mosquitto_pub-${{ matrix.arch }}
+          strip dist/mosquitto_pub-${{ matrix.arch }}
+          tar -czf mosquitto_pub-${{ matrix.arch }}.tar.gz -C dist mosquitto_pub-${{ matrix.arch }}
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/mosquitto_pub-${{ matrix.arch }}
+            dist/mosquitto_pub-${{ matrix.arch }}.tar.gz
